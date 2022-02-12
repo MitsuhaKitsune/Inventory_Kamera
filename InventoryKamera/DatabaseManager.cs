@@ -35,6 +35,7 @@ namespace InventoryKamera
 		private const string DevMaterialsJson = "devmaterials.json";
 		private const string MaterialsJson = "materials.json";
 		private const string MaterialsCompleteJson = "materialscomplete.json";
+		private const string FurnishingsJson = "furnishings.json";
 
 		// This is the best place I think we can find easily accessible and up-to-date lists of information
 		private const string CharactersURL = "https://raw.githubusercontent.com/Dimbreath/GenshinData/master/ExcelBinOutput/AvatarExcelConfigData.json";
@@ -44,6 +45,7 @@ namespace InventoryKamera
 		private const string ArtifactsURL = "https://raw.githubusercontent.com/Dimbreath/GenshinData/master/ExcelBinOutput/DisplayItemExcelConfigData.json";
 		private const string WeaponsURL = "https://raw.githubusercontent.com/Dimbreath/GenshinData/master/ExcelBinOutput/WeaponExcelConfigData.json";
 		private const string MaterialsURL = "https://raw.githubusercontent.com/Dimbreath/GenshinData/master/ExcelBinOutput/MaterialExcelConfigData.json";
+		private const string FurnishingsURL = "https://raw.githubusercontent.com/Dimbreath/GenshinData/master/ExcelBinOutput/HomeWorldFurnitureExcelConfigData.json";
 		private const string MappingsURL = "https://raw.githubusercontent.com/Dimbreath/GenshinData/master/TextMap/TextMapEN.json";
 
 		private Dictionary<string, string> Mappings = new Dictionary<string, string>();
@@ -57,12 +59,14 @@ namespace InventoryKamera
 		private int _charactersTodo;
 		private int _devTodo;
 		private int _materialsTodo;
+		private int _furnishingsTodo;
 
 		private int _weaponsCompleted;
 		private int _artifactsCompleted;
 		private int _charactersCompleted;
 		private int _devCompleted;
 		private int _materialsCompleted;
+		private int _furnishingsCompleted;
 
 		private int _completed;
 		private int _todo;
@@ -140,6 +144,18 @@ namespace InventoryKamera
 			set { _materialsCompleted = value; _completed += value; }
 		}
 
+		public int FurnishingsTodo
+		{
+			get { return _furnishingsTodo; }
+			set { _furnishingsTodo = value; _todo += value; }
+		}
+
+		public int FurnishingsCompleted
+		{
+			get { return _furnishingsCompleted; }
+			set { _furnishingsCompleted = value; _completed += value; }
+		}
+
 		#endregion Progress Variables
 
 		public DatabaseManager()
@@ -209,6 +225,11 @@ namespace InventoryKamera
 			return GetList(ListType.AllMaterials).ToObject<Dictionary<string, string>>();
 		}
 
+		public Dictionary<string, string> LoadFurnishings()
+		{
+			return GetList(ListType.Furnishings).ToObject<Dictionary<string, string>>();
+		}
+
 		private JToken GetList(ListType list)
 		{
 			string file = "";
@@ -236,6 +257,10 @@ namespace InventoryKamera
 
 				case ListType.AllMaterials:
 					file = MaterialsCompleteJson;
+					break;
+
+				case ListType.Furnishings:
+					file = FurnishingsJson;
 					break;
 
 				default:
@@ -313,6 +338,10 @@ namespace InventoryKamera
 
 				case ListType.AllMaterials:
 					pass = UpdateAllMaterials(@new);
+					break;
+
+				case ListType.Furnishings:
+					pass = UpdateFurnishings(@new);
 					break;
 
 				default:
@@ -764,6 +793,69 @@ namespace InventoryKamera
 			return true;
 		}
 
+		private bool UpdateFurnishings(bool @new = false)
+		{
+			var localVersion = !localVersions.TryGetValue("furnishings", out string v) ? new Version() : new Version(v);
+			var remoteVersion = GetRemoteVersion();
+
+			if (remoteVersion == new Version()) return false;
+
+			if (@new)
+			{
+				localVersion = new Version();
+				File.Delete(ListsDir + FurnishingsJson);
+			}
+
+			if (localVersion.CompareTo(remoteVersion) >= 0)
+			{
+				Debug.WriteLine("All local furnishings up to date");
+				return true;
+			}
+			else
+			{
+				Debug.WriteLine("All local furnishings out of date");
+				LoadMappings();
+			}
+
+			try
+			{
+				Dictionary<string, string> data = JToken.Parse(LoadJsonFromFile(FurnishingsJson)).ToObject<Dictionary<string, string>>();
+				List<JObject> furnishings = JArray.Parse(LoadJsonFromURLAsync(FurnishingsURL)).ToObject<List<JObject>>();
+				furnishings.RemoveAll(furnishing => !furnishing.ContainsKey("NameTextMapHash"));
+				FurnishingsTodo = furnishings.Count;
+				Debug.WriteLine($"Added {_weapons_todo} furnishings. Total {TotalTodo}");
+
+				foreach (var furnishing in furnishings)
+				{
+					try
+					{
+						string name = Mappings[furnishing["NameTextMapHash"].ToString()].ToString(); // Red-Iron Coral
+
+						string PascalCase = CultureInfo.GetCultureInfo("en").TextInfo.ToTitleCase(name);
+						string nameGOOD = Regex.Replace(PascalCase, @"[\W]", string.Empty);  // RedIronCoral
+						string nameKey = nameGOOD.ToLower();                                 // redironcoral
+
+						if (!data.ContainsKey(nameKey))
+						{
+							data.Add(nameKey, nameGOOD);
+						}
+						++FurnishingsCompleted;
+					}
+					catch (Exception)
+					{ }
+				}
+
+				SaveJson(JsonConvert.SerializeObject(data), FurnishingsJson);
+				localVersions["furnishings"] = remoteVersion.ToString();
+				SaveJson(JsonConvert.SerializeObject(localVersions), versionJson);
+			}
+			catch (Exception)
+			{
+				return false;
+			}
+			return true;
+		}
+
 		private static Version GetRemoteVersion()
 		{
 			using (WebClient client = new WebClient())
@@ -841,6 +933,7 @@ namespace InventoryKamera
 		Artifacts,
 		CharacterDevelopmentItems,
 		Materials,
-		AllMaterials
+		AllMaterials,
+		Furnishings
 	}
 }

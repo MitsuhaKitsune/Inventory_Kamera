@@ -50,6 +50,7 @@ namespace InventoryKamera
 			Directory.CreateDirectory("./logging/artifacts");
 			Directory.CreateDirectory("./logging/characters");
 			Directory.CreateDirectory("./logging/materials");
+			Directory.CreateDirectory("./logging/furnishings");
 		}
 
 		public void StopImageProcessorWorkers()
@@ -180,6 +181,26 @@ namespace InventoryKamera
 				try
 				{
 					MaterialScraper.Scan_Materials(InventorySection.Materials, ref Materials);
+				}
+				catch (FormatException ex) { UserInterface.AddError(ex.Message); }
+				catch (ThreadAbortException) { }
+				catch (Exception ex)
+				{
+					UserInterface.AddError(ex.Message + "\n" + ex.StackTrace);
+				}
+				Navigation.MainMenuScreen();
+			}
+
+			// Scan Furnishings
+			if (Properties.Settings.Default.ScanFurnishings)
+			{
+				// Get Furnishings
+				Navigation.InventoryScreen();
+				Navigation.SelectFurnishingsInventory();
+				HashSet<Material> devItems = new HashSet<Material>();
+				try
+				{
+					MaterialScraper.Scan_Materials(InventorySection.Furnishings, ref Materials);
 				}
 				catch (FormatException ex) { UserInterface.AddError(ex.Message); }
 				catch (ThreadAbortException) { }

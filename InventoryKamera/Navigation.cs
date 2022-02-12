@@ -207,6 +207,15 @@ namespace InventoryKamera
 			SystemRandomWait(Speed.UI);
 		}
 
+		public static void SelectFurnishingsInventory()
+		{
+			int buttonX = (int)(898 / 1280.0 * GetWidth());
+			int buttonY = (int)(30 / 720.0 * GetHeight());
+			SetCursorPos(position.Left + buttonX, position.Top + buttonY);
+			Click();
+			SystemRandomWait(Speed.UI);
+		}
+
 		public static void SelectCharacterAttributes()
 		{
 			int xOffset = (int)(170 / 1280.0 * GetWidth());

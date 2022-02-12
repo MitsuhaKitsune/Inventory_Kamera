@@ -47,7 +47,7 @@ namespace InventoryKamera
 	{
 		public static void Scan_Materials(InventorySection section, ref HashSet<Material> materials)
 		{
-			if (!materials.Contains(new Material("Mora", 0)))
+			if (!materials.Contains(new Material("Mora", 0)) && section != InventorySection.Furnishings)
 			{
 				materials.Add(new Material("Mora", ScanMora()));
 			}
@@ -453,6 +453,9 @@ namespace InventoryKamera
 
 			if (section == InventorySection.Materials)
 				return Scraper.FindClosestMaterialName(text);
+
+			if (section == InventorySection.Furnishings)
+				return Scraper.FindClosestFurnishingName(text);
 
 			return null;
 		}

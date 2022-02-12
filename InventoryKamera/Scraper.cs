@@ -83,7 +83,7 @@ namespace InventoryKamera
 		public static ConcurrentBag<TesseractEngine> engines;
 
 
-		public static readonly Dictionary<string, string> Artifacts, Weapons, DevMaterials, Materials, AllMaterials, Elements;
+		public static readonly Dictionary<string, string> Artifacts, Weapons, DevMaterials, Materials, AllMaterials, Elements, Furnishings;
 
 		public static Dictionary<string, JObject> Characters;
 
@@ -104,6 +104,7 @@ namespace InventoryKamera
 			Materials = listManager.LoadMaterials();
 			AllMaterials = listManager.LoadAllMaterials();
 			Elements = new Dictionary<string, string>();
+			Furnishings = listManager.LoadFurnishings();
 
 			foreach (var element in elements)	Elements.Add(element, char.ToUpper(element[0]) + element.Substring(1));
 			Debug.WriteLine("Scraper initialized");
@@ -354,6 +355,11 @@ namespace InventoryKamera
 		{
 			string value = FindClosestInDict(source: name, targets: Materials, maxEdits: maxEdits);
 			return !string.IsNullOrWhiteSpace(value) ? value : FindClosestInDict(source: name, targets: AllMaterials, maxEdits: maxEdits);
+		}
+		public static string FindClosestFurnishingName(string name, int maxEdits = 15)
+		{
+			string value = FindClosestInDict(source: name, targets: Furnishings, maxEdits: maxEdits);
+			return !string.IsNullOrWhiteSpace(value) ? value : FindClosestInDict(source: name, targets: Furnishings, maxEdits: maxEdits);
 		}
 
 		private static string FindClosestInDict(string source, Dictionary<string, string> targets, int maxEdits = 5)

@@ -25,6 +25,7 @@ namespace InventoryKamera
 			checkBoxes.Add(DevMaterialsCheckBox);
 			checkBoxes.Add(MaterialsCheckBox);
 			checkBoxes.Add(AllMaterialsCheckBox);
+			checkBoxes.Add(FurnishingsCheckBox);
 
 			progressBars.Add(CharactersProgressBar);
 			progressBars.Add(WeaponsProgresBar);
@@ -32,6 +33,7 @@ namespace InventoryKamera
 			progressBars.Add(DevMaterialsProgressBar);
 			progressBars.Add(MaterialsProgressBar);
 			progressBars.Add(AllMaterialsProgressBar);
+			progressBars.Add(FurnishingsProgressBar);
 
 			ToolTip.SetToolTip(CreateNewCheckBox, "Create new selected files");
 		}
@@ -44,7 +46,7 @@ namespace InventoryKamera
 			Task<bool> updateTask;
 			UpdateStatusLabel.Text = "";
 
-			if (EverythingCheckBox.Checked)
+			if (FurnishingsCheckBox.Checked)
 			{
 				updateTask = Task.Run(() => { return databaseManager.UpdateAllLists(CreateNewCheckBox.Checked); });
 			}
@@ -88,6 +90,7 @@ namespace InventoryKamera
 			DevMaterialsCheckBox.Enabled = !EverythingCheckBox.Checked;
 			MaterialsCheckBox.Enabled = !EverythingCheckBox.Checked;
 			AllMaterialsCheckBox.Enabled  = !EverythingCheckBox.Checked;
+			FurnishingsCheckBox.Enabled = !EverythingCheckBox.Checked;
 		}
 
 		private void DatabaseUpdateForm_FormClosed(object sender, FormClosedEventArgs e)
