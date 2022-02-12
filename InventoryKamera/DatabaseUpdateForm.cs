@@ -46,7 +46,7 @@ namespace InventoryKamera
 			Task<bool> updateTask;
 			UpdateStatusLabel.Text = "";
 
-			if (FurnishingsCheckBox.Checked)
+			if (EverythingCheckBox.Checked)
 			{
 				updateTask = Task.Run(() => { return databaseManager.UpdateAllLists(CreateNewCheckBox.Checked); });
 			}

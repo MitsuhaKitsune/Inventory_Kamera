@@ -819,11 +819,19 @@ namespace InventoryKamera
 
 			try
 			{
+				var exceptions = new List<string>()
+				{
+					"Animal",                       // Animals
+					"Fish",                         // Fish
+					"NPC"                           // NPCs
+				};
+
 				Dictionary<string, string> data = JToken.Parse(LoadJsonFromFile(FurnishingsJson)).ToObject<Dictionary<string, string>>();
 				List<JObject> furnishings = JArray.Parse(LoadJsonFromURLAsync(FurnishingsURL)).ToObject<List<JObject>>();
 				furnishings.RemoveAll(furnishing => !furnishing.ContainsKey("NameTextMapHash"));
+				furnishings.RemoveAll(furnishing => furnishing.ContainsKey("SurfaceType") && exceptions.Contains(furnishing["SurfaceType"].ToString()));
 				FurnishingsTodo = furnishings.Count;
-				Debug.WriteLine($"Added {_weapons_todo} furnishings. Total {TotalTodo}");
+				Debug.WriteLine($"Added {_furnishingsTodo} furnishings. Total {TotalTodo}");
 
 				foreach (var furnishing in furnishings)
 				{
