@@ -461,9 +461,9 @@ namespace InventoryKamera
 		{
 			var region = new RECT(
 				Left: rectangle.X,
-				Top: (int)(rectangle.Y + (0.8 * rectangle.Height)), // Only get the bottom of inventory item
+				Top: (int)(rectangle.Y + (0.89 * rectangle.Height)), // Only get the bottom of inventory item
 				Right: rectangle.Right,
-				Bottom: rectangle.Bottom + 10);
+				Bottom: rectangle.Bottom + 6);
 
 			using (Bitmap bm = Navigation.CaptureRegion(region))
 			{
